@@ -1,0 +1,12 @@
+.git
+.gitignore
+.pytest_cache
+__pycache__
+*.pyc
+.env
+.venv
+docs/
+jenkins/
+tests/
+Jenkinsfile
+README.md

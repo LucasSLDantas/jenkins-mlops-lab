@@ -1,0 +1,33 @@
+services:
+  jenkins:
+    image: jenkins/jenkins:lts-jdk21
+    container_name: jenkins-mlops-server
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+
+  agent:
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+    image: jenkins-mlops-agent:local
+    container_name: jenkins-mlops-agent
+    restart: unless-stopped
+    depends_on:
+      - jenkins
+    entrypoint: ["/bin/sh", "/opt/jenkins/start-agent.sh"]
+    volumes:
+      - agent_home:/home/jenkins/agent
+      - ./start-agent.sh:/opt/jenkins/start-agent.sh:ro
+    secrets:
+      - agent-secret
+
+volumes:
+  jenkins_home:
+  agent_home:
+
+secrets:
+  agent-secret:
+    file: ./secrets/agent-secret
