@@ -1,5 +1,28 @@
 
 services:
+  deploy-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile.deploy-agent
+    image: jenkins-mlops-deploy-agent:local
+    container_name: jenkins-mlops-deploy-agent
+    restart: unless-stopped
+    depends_on:
+      - jenkins
+    user: "0:0"
+    environment:
+      JENKINS_URL: http://jenkins:8080/
+      JENKINS_AGENT_NAME: deploy-agent
+      JENKINS_WEB_SOCKET: "true"
+    entrypoint: ["/bin/sh", "/opt/jenkins/start-agent.sh"]
+    volumes:
+      - deploy_agent_home:/home/jenkins/agent
+      - ./start-agent.sh:/opt/jenkins/start-agent.sh:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    secrets:
+      - source: deploy-agent-secret
+        target: agent-secret
+
   jenkins:
     image: jenkins/jenkins:lts-jdk21
     container_name: jenkins-mlops-server
@@ -24,6 +47,10 @@ services:
       - ./start-agent.sh:/opt/jenkins/start-agent.sh:ro
     secrets:
       - agent-secret
+    environment:
+      JENKINS_URL: http://jenkins:8080/
+      JENKINS_AGENT_NAME: mlops-agent
+      JENKINS_WEB_SOCKET: "true"
 
   buildkit:
     image: moby/buildkit:buildx-stable-1
@@ -42,8 +69,11 @@ volumes:
   jenkins_home:
   agent_home:
   buildkit_data:
+  deploy_agent_home:
 
 secrets:
+  deploy-agent-secret:
+    file: ./secrets/deploy-agent-secret
   agent-secret:
     file: ./secrets/agent-secret
 

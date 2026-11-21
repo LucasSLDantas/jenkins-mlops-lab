@@ -1,16 +1,14 @@
 #!/bin/sh
 set -eu
 
-SECRET="$(tr -d '\r\n' < /run/secrets/agent-secret)"
+export JENKINS_SECRET="$(tr -d '\r\n' < /run/secrets/agent-secret)"
 
-if [ -z "$SECRET" ]; then
+if [ -z "$JENKINS_SECRET" ]; then
     echo "ERRO: segredo do agente está vazio."
     exit 1
 fi
 
-exec /usr/local/bin/jenkins-agent \
-    -url "http://jenkins:8080/" \
-    -name "mlops-agent" \
-    -secret "$SECRET" \
-    -webSocket \
-    -workDir "/home/jenkins/agent"
+: "${JENKINS_URL:?JENKINS_URL nao configurada}"
+: "${JENKINS_AGENT_NAME:?JENKINS_AGENT_NAME nao configurado}"
+
+exec /usr/local/bin/jenkins-agent
