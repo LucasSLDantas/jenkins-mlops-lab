@@ -29,15 +29,29 @@ pipeline {
                 '''
             }
         }
+
+        stage('Docker Build') {
+            steps {
+                sh '''
+                    buildctl \
+                      --addr tcp://buildkit:1234 \
+                      build \
+                      --frontend dockerfile.v0 \
+                      --local context=. \
+                      --local dockerfile=. \
+                      --output type=oci,dest=/tmp/jenkins-mlops-api.tar
+                '''
+            }
+        }
     }
 
     post {
         success {
-            echo 'CI concluido: todos os testes passaram!'
+            echo 'CI concluido: testes e Docker Build executados!'
         }
 
         failure {
-            echo 'CI falhou: verifique o console do Jenkins.'
+            echo 'Pipeline falhou: verifique o console do Jenkins.'
         }
     }
 }

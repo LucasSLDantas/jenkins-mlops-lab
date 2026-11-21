@@ -1,3 +1,5 @@
+FROM moby/buildkit:v0.35.1 AS buildkit
+
 FROM jenkins/inbound-agent:latest-jdk21
 
 USER root
@@ -8,7 +10,10 @@ RUN apt-get update && \
         python3-venv \
         python3-pip \
         curl \
-        ca-certificates && \
+        ca-certificates \
+        docker-cli && \
     rm -rf /var/lib/apt/lists/*
+
+COPY --from=buildkit /usr/bin/buildctl /usr/local/bin/buildctl
 
 USER jenkins
