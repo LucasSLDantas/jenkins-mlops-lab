@@ -1,24 +1,31 @@
+
 from fastapi import FastAPI
 from pydantic import BaseModel
 
+APP_VERSION = "1.0.0"
+
 app = FastAPI(
     title="Jenkins MLOps Lab",
-    version="1.0.0"
+    version=APP_VERSION
 )
+
 
 class TextInput(BaseModel):
     text: str
+
 
 @app.get("/")
 def home():
     return {
         "message": "API Jenkins MLOps funcionando!",
-        "version": "1.0.0"
+        "version": APP_VERSION
     }
+
 
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
 
 @app.post("/predict")
 def predict(data: TextInput):
